@@ -1,0 +1,157 @@
+swagger: '2.0'
+info:
+  description: |
+    Dies ist eine Beispiel API, wie wir sie gerne auf Seiten der WG Webservices hätten.
+  version: 1.0.0
+  title: WG Webservices API
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: wertgarantie.bifrost@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+tags:
+  - name: Desired Webservices Endpoints
+    description: Desired endpoints from webservices API in order to make implementations for clients easier
+paths:
+  /productOffers:
+    post:
+      tags:
+        - productOffers
+      summary: Retrieve client's product offers for specific object code (device class)
+      operationId: getProductOffers
+      consumes:
+        - multipart/form-data
+      produces:
+        - application/json
+        - application/xml
+      parameters:
+        - name: FUNCTION
+          in: body
+          description: function to be called in webservices api (GET_AGENT_DATA)
+          required: true
+          schema:
+            $ref: '#/definitions/FormData'
+      responses:
+        200:
+          description: successfully fetched product offers
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProductOffer'
+#  /checkout:
+#    post:
+#      tags:
+#        - pet
+#      summary: Finds Pets by status
+#      description: Multiple status values can be provided with comma separated strings
+#      operationId: findPetsByStatus
+#      produces:
+#        - application/json
+#        - application/xml
+#      parameters:
+#        - name: status
+#          in: query
+#          description: Status values that need to be considered for filter
+#          required: true
+#          type: array
+#          items:
+#            type: string
+#            enum:
+#              - available
+#              - pending
+#              - sold
+#            default: available
+#          collectionFormat: multi
+#      responses:
+#        200:
+#          description: successful operation
+#          schema:
+#            type: array
+#            items:
+#              $ref: '#/definitions/Pet'
+#        400:
+#          description: Invalid status value
+definitions:
+  ProductOffer:
+    type: object
+    properties:
+      name:
+        type: string
+      documents:
+        type: array
+        items:
+          $ref: '#/definitions/Document'
+  Document:
+    type: object
+    properties:
+      document_title:
+        type: string
+      document_type:
+        type: string
+      document_link:
+        type: string
+  Device:
+    type: object
+    properties:
+      objectCode:
+        type: integer
+        format: int64
+      objectCodeExternal:
+        type: string
+      maxPriceLimitation:
+        type: integer
+        format: int64
+      intervals:
+        type: array
+        items:
+          $ref: '#/definitions/Interval'
+  Interval:
+    type: object
+    properties:
+      intervalCode:
+        type: integer
+        format: int64
+      description:
+        type: string
+      priceRangePremiums:
+        type: array
+        items:
+          $ref: '#/definitions/PriceRangePremium'
+  PriceRangePremium:
+    type: object
+    properties:
+      minClose:
+        type: integer
+        format: int64
+      maxOpen:
+        type: integer
+        format: int64
+      insurancePremium:
+        type: number
+        format: double
+  FormData:
+    type: object
+    properties:
+      function:
+        type: string
+      shaping:
+        type: string
+      API:
+        type: string
+      session:
+        type: string
+      agentNr:
+        type: string
+      objectCode:
+        type: integer
+        format: int64
+      purchasePrice:
+        type: number
+        format: double
+      purchaseDate:
+        type: string
+        format: date
+schemes:
+  - https
+  - http
