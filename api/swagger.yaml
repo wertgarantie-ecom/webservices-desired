@@ -1,157 +1,138 @@
-swagger: '2.0'
+openapi: 3.0.0
 info:
-  description: |
-    Dies ist eine Beispiel API, wie wir sie gerne auf Seiten der WG Webservices hätten.
-  version: 1.0.0
+  description: >
+    Dies ist eine Beispiel API, wie wir sie gerne auf Seiten der WG Webservices
+    hätten.
+  version: '0.0.1'
   title: WG Webservices API
-  termsOfService: http://swagger.io/terms/
   contact:
     email: wertgarantie.bifrost@gmail.com
   license:
     name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
-tags:
-  - name: Desired Webservices Endpoints
-    description: Desired endpoints from webservices API in order to make implementations for clients easier
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
 paths:
   /productOffers:
-    post:
-      tags:
-        - productOffers
+    get:
       summary: Retrieve client's product offers for specific object code (device class)
       operationId: getProductOffers
-      consumes:
-        - multipart/form-data
-      produces:
-        - application/json
-        - application/xml
       parameters:
-        - name: FUNCTION
-          in: body
-          description: function to be called in webservices api (GET_AGENT_DATA)
+        - name: objectCode
+          in: query
+          description: object code of the insurable shop product (optional)
+          required: false
+          schema:
+            type: string
+        - name: purchasePrice
+          in: query
+          description: >-
+            purchase price in minor units (cent): filters product offers by price range
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            default: 2
+          required: false
+          description: max number of product offers to send back
+        - name: session
+          in: header
+          description: >-
+            current session received from auth call (could be mapped to unique
+            agent number)
           required: true
           schema:
-            $ref: '#/definitions/FormData'
+            type: string
       responses:
-        200:
+        '200':
           description: successfully fetched product offers
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/ProductOffer'
-#  /checkout:
-#    post:
-#      tags:
-#        - pet
-#      summary: Finds Pets by status
-#      description: Multiple status values can be provided with comma separated strings
-#      operationId: findPetsByStatus
-#      produces:
-#        - application/json
-#        - application/xml
-#      parameters:
-#        - name: status
-#          in: query
-#          description: Status values that need to be considered for filter
-#          required: true
-#          type: array
-#          items:
-#            type: string
-#            enum:
-#              - available
-#              - pending
-#              - sold
-#            default: available
-#          collectionFormat: multi
-#      responses:
-#        200:
-#          description: successful operation
-#          schema:
-#            type: array
-#            items:
-#              $ref: '#/definitions/Pet'
-#        400:
-#          description: Invalid status value
-definitions:
-  ProductOffer:
-    type: object
-    properties:
-      name:
-        type: string
-      documents:
-        type: array
-        items:
-          $ref: '#/definitions/Document'
-  Document:
-    type: object
-    properties:
-      document_title:
-        type: string
-      document_type:
-        type: string
-      document_link:
-        type: string
-  Device:
-    type: object
-    properties:
-      objectCode:
-        type: integer
-        format: int64
-      objectCodeExternal:
-        type: string
-      maxPriceLimitation:
-        type: integer
-        format: int64
-      intervals:
-        type: array
-        items:
-          $ref: '#/definitions/Interval'
-  Interval:
-    type: object
-    properties:
-      intervalCode:
-        type: integer
-        format: int64
-      description:
-        type: string
-      priceRangePremiums:
-        type: array
-        items:
-          $ref: '#/definitions/PriceRangePremium'
-  PriceRangePremium:
-    type: object
-    properties:
-      minClose:
-        type: integer
-        format: int64
-      maxOpen:
-        type: integer
-        format: int64
-      insurancePremium:
-        type: number
-        format: double
-  FormData:
-    type: object
-    properties:
-      function:
-        type: string
-      shaping:
-        type: string
-      API:
-        type: string
-      session:
-        type: string
-      agentNr:
-        type: string
-      objectCode:
-        type: integer
-        format: int64
-      purchasePrice:
-        type: number
-        format: double
-      purchaseDate:
-        type: string
-        format: date
-schemes:
-  - https
-  - http
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductOffer'
+components:
+  schemas:
+    ProductOffer:
+      type: object
+      properties:
+        name:
+          type: string
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/Document'
+    Document:
+      type: object
+      properties:
+        document_title:
+          type: string
+        document_type:
+          type: string
+        document_link:
+          type: string
+    Device:
+      type: object
+      properties:
+        objectCode:
+          type: integer
+          format: int64
+        objectCodeExternal:
+          type: string
+        maxPriceLimitation:
+          type: integer
+          format: int64
+        intervals:
+          type: array
+          items:
+            $ref: '#/components/schemas/Interval'
+    Interval:
+      type: object
+      properties:
+        intervalCode:
+          type: integer
+          format: int64
+        description:
+          type: string
+        priceRangePremiums:
+          type: array
+          items:
+            $ref: '#/components/schemas/PriceRangePremium'
+    PriceRangePremium:
+      type: object
+      properties:
+        minClose:
+          type: integer
+          format: int64
+        maxOpen:
+          type: integer
+          format: int64
+        insurancePremium:
+          type: number
+          format: double
+    GetOffersData:
+      type: object
+      properties:
+        function:
+          type: string
+        shaping:
+          type: string
+        API:
+          type: string
+        session:
+          type: string
+        agentNr:
+          type: string
+        objectCode:
+          type: integer
+          format: int64
+        purchasePrice:
+          type: number
+          format: double
+        purchaseDate:
+          type: string
+          format: date
