@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "prestart": "npm install",
-    "start": "node index.js"
+    "start": "node index.js",
+    "editor-start": "docker run --name swagger-editor -d -p 8111:8080 swaggerapi/swagger-editor",
+    "editor-open": "open http://localhost:8111",
+    "editor-stop": "docker stop swagger-editor"
   },
   "keywords": [
     "swagger"
