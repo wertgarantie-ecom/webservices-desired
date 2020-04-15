@@ -2,7 +2,12 @@ openapi: 3.0.0
 info:
   description: >
     Dies ist eine Beispiel API, wie wir sie uns auf Seiten der WG Webservices vorstellen würden.
-    Das Ziel ist es mehrere Produkt Offerten mit einem Request abrufen zu können. Ein Wertgarantie Produkt kann dabei zu mehreren Produkt Offerten führen. Zum Beispiel kann das Produkt Komplettschutz (für Smartphones) zu den Produkt Offerten "Basic" und "Premium" führen, wobei Premium das Risiko Diebstahlschutz mit einschließt. Eine Offerte besteht also jeweils aus einer Bestimmten Produkt Konfiguration. Welche Offerten angeboten werden kann pro Client (Shop) konfiguriert werden.
+
+
+    Das Ziel ist es mehrere Produkt Offerten mit einem Request abrufen zu können. Ein Wertgarantie Produkt kann dabei zu mehreren Produkt Offerten führen. Zum Beispiel kann das Produkt Komplettschutz (für Smartphones) zu den Produkt Offerten "Basic" und "Premium" führen, wobei Premium das Risiko Diebstahlschutz mit einschließt. Eine Offerte besteht also jeweils aus einer bestimmten Produkt Konfiguration.
+
+
+    Welche Offerten angeboten werden, kann pro Client (Shop) konfiguriert werden.
   version: "1.0.2"
   title: WG Webservices API
   contact:
@@ -82,6 +87,11 @@ paths:
   /prodcutOffers/{productOfferId}/insuranceProposal:
     post:
       summary: request to create an insurance proposal for the given product offer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InsuranceProposalRequest'
       parameters:
         - in: path
           name: productOfferId
@@ -89,11 +99,14 @@ paths:
           schema:
             type: string
             format: uuid
-        - in: body
-          name: insuranceProposalRequest
+        - name: session
+          in: header
+          description: >-
+            current session received from auth call (could be mapped to unique
+            agent number)
           required: true
           schema:
-            $ref: '#/components/schemas/InsuranceProposalRequest'
+            type: string
       responses:
         '202':
           description: successfully created insurance proposal
@@ -249,6 +262,93 @@ components:
 
     InsuranceProposalRequest:
       type: object
+      properties:
+        customer:
+          $ref: '#/components/schemas/Customer'
+        shopProduct:
+          $ref: '#/components/schemas/ShopProduct'
+        confirmations:
+          $ref: '#/components/schemas/Confirmations'
+        payment:
+          $ref: '#/components/schemas/Payment'
+
+    Customer:
+      type: object
+      properties:
+        salutation:
+          type: string
+        title:
+          type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+        country:
+          type: string
+        city:
+          type: string
+        zip:
+          type: string
+        street:
+          type: string
+        houseNumber:
+          type: string
+        email:
+          type: string
+          format: email
+      required:
+        - salutation
+        - firstname
+        - lastname
+        - country
+        - city
+        - zip
+        - street
+        - houseNumber
+        - email
+
+    ShopProduct:
+      type: object
+      properties:
+        model:
+          type: string
+          example: "iPhone 11"
+        externalObjectCode:
+          type: string
+          example: "Smartphone"
+        purchasePrice:
+          type: integer
+          format: int64
+          example: 110000
+          description: 'price in minor units (cent)'
+        manufacturer:
+          type: string
+          example: "Apple Inc."
+
+    Confirmations:
+      type: object
+      properties:
+        lockPriceConfirmed:
+          type: boolean
+          description: 'only required if shop product is bike/e-bike'
+        termsAndConditionsAccepted:
+          type: boolean
+        legalAgeConfirmed:
+          type: boolean
+
+    Payment:
+      type: object
+      properties:
+        paymentMethod:
+          type: string
+          enum: ["bankTransfer"]
+          description: 'can be altered by the user later on in the customer portal'
+
 
     InsuranceProposalResponse:
       type: object
+      properties:
+        proposalId:
+          type: string
+          format: uuid
+          description: 'Id that allows the user to check the state of his/her insurance proposal'
