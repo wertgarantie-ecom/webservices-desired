@@ -2,6 +2,7 @@ openapi: 3.0.0
 info:
   description: >
     Dies ist eine Beispiel API, wie wir sie uns auf Seiten der WG Webservices vorstellen würden.
+    Das Ziel ist es mehrere Produkt Offerten mit einem Request abrufen zu können. Ein Wertgarantie Produkt kann dabei zu mehreren Produkt Offerten führen. Zum Beispiel kann das Produkt Komplettschutz (für Smartphones) zu den Produkt Offerten "Basic" und "Premium" führen, wobei Premium das Risiko Diebstahlschutz mit einschließt. Eine Offerte besteht also jeweils aus einer Bestimmten Produkt Konfiguration. Welche Offerten angeboten werden kann pro Client (Shop) konfiguriert werden.
   version: "1.0.2"
   title: WG Webservices API
   contact:
@@ -17,7 +18,7 @@ paths:
       parameters:
         - name: objectCodeExternal
           in: query
-          description: shop's object code of the insurable product (optional)
+          description: shop's object code of the insurable product (optional). The mapping could be determined by the session (one mapping per client).
           required: false
           schema:
             type: string
@@ -60,6 +61,59 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProductOfferResponse'
+        '204':
+          description: could not find product offers for given request parameters
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        '401':
+          description: unauthorized, no or invalid session id provided
+          content:
+            application/json:
+              schema:
+                type: string
+  /prodcutOffers/{productOfferId}/insuranceProposal:
+    post:
+      summary: request to create an insurance proposal for the given product offer
+      parameters:
+        - in: path
+          name: productOfferId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: body
+          name: insuranceProposalRequest
+          required: true
+          schema:
+            $ref: '#/components/schemas/InsuranceProposalRequest'
+      responses:
+        '202':
+          description: successfully created insurance proposal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InsuranceProposalResponse'
+        '400':
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        '401':
+          description: unauthorized, no or invalid session id provided
+          content:
+            application/json:
+              schema:
+                type: string
+
 components:
   schemas:
     ProductOfferResponse:
@@ -192,3 +246,9 @@ components:
         minClose: 0
         maxOpen: 30000
         insurancePremium: 500
+
+    InsuranceProposalRequest:
+      type: object
+
+    InsuranceProposalResponse:
+      type: object
