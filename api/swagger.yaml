@@ -1,9 +1,8 @@
 openapi: 3.0.0
 info:
   description: >
-    Dies ist eine Beispiel API, wie wir sie gerne auf Seiten der WG Webservices
-    hätten.
-  version: '0.0.1'
+    Dies ist eine Beispiel API, wie wir sie uns auf Seiten der WG Webservices vorstellen würden.
+  version: "1.0.2"
   title: WG Webservices API
   contact:
     email: wertgarantie.bifrost@gmail.com
@@ -16,20 +15,28 @@ paths:
       summary: Retrieve client's product offers for specific object code (device class)
       operationId: getProductOffers
       parameters:
-        - name: objectCode
+        - name: objectCodeExternal
           in: query
-          description: object code of the insurable shop product (optional)
+          description: shop's object code of the insurable product (optional)
           required: false
           schema:
             type: string
+          examples:
+            smartphone:
+              value: 'smartphone'
         - name: purchasePrice
           in: query
           description: >-
-            purchase price in minor units (cent): filters product offers by price range
+            purchase price in minor units (cent): filters product offers by
+            price range
           required: false
           schema:
             type: integer
             format: int64
+          examples:
+            sample1:
+              value: 80000
+              summary: "represents 800.00 EUR"
         - in: query
           name: limit
           schema:
@@ -52,29 +59,67 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ProductOffer'
+                $ref: '#/components/schemas/ProductOfferResponse'
 components:
   schemas:
-    ProductOffer:
+    ProductOfferResponse:
       type: object
       properties:
-        name:
+        clientId:
           type: string
-        documents:
+          example:
+            clientId: "partnershops clientId"
+        generalDocuments:
           type: array
           items:
             $ref: '#/components/schemas/Document'
+        productOffers:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductOffer'
+
+    ProductOffer:
+      type: object
+      properties:
+        productId:
+          type: string
+          format: uuid
+          example: "0cec8bba-c66b-4de0-aa92-84f6440a10d3"
+        name:
+          type: string
+          example: "Komplettschutz mit Premium-Option"
+        productDocuments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Document'
+          example:
+            - documentTitle: "GU WG DE KS 0419_PRODUKTINFORMATIONSBLATT.PDF"
+              documentType: "IPID"
+              documentLink: "https://webservices/documents/GU_WG_DE_KS_0419_PRODUKTINFORMATIONSBLATT.PDF"
+        advantages:
+          type: array
+          items:
+            type: string
+          example: ["Cyberschutz bei Missbrauch von Online-Accounts und Zahlungsdaten", "Diebstahlschutz", "Keine Selbstbeteiligung im Schadensfall", "Unsachgemäße Handhabung", "Weltweiter Schutz", "Volle Kostenübernahme bei Reparaturen", "..."]
+        devices:
+          type: array
+          items:
+            $ref: '#/components/schemas/Device'
+
     Document:
       type: object
       properties:
-        document_title:
+        documentTitle:
           type: string
-        document_type:
+        documentType:
           type: string
-        document_link:
+        documentLink:
           type: string
+      example:
+        - documentTitle: "AVB.PDF"
+          documentType: "GTCI"
+          documentLink: "https://webservices/documents/GAVB.PDF"
+
     Device:
       type: object
       properties:
@@ -90,6 +135,24 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Interval'
+      example:
+        objectCode: 9025
+        objectCodeExternal: "smartphone"
+        maxPriceLimitation: 1800
+        intervals:
+          intervalCode: 1
+          description: "monatlich"
+          priceRangePremiums:
+            - minClose: 0
+              maxOpen: 30000
+              insurancePremium: 695
+            - minClose: 30000
+              maxOpen: 80000
+              insurancePremium: 995
+            - minClose: 80000
+              maxOpen: 180000
+              insurancePremium: 1295
+
     Interval:
       type: object
       properties:
@@ -102,6 +165,17 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PriceRangePremium'
+      example:
+        intervalCode: 1
+        description: "monatlich"
+        priceRangePremiums:
+          - minClose: 0
+            maxOpen: 30000
+            insurancePremium: 500
+          - minClose: 30000
+            maxOpen: 80000
+            insurancePremium: 800
+
     PriceRangePremium:
       type: object
       properties:
@@ -112,27 +186,9 @@ components:
           type: integer
           format: int64
         insurancePremium:
-          type: number
-          format: double
-    GetOffersData:
-      type: object
-      properties:
-        function:
-          type: string
-        shaping:
-          type: string
-        API:
-          type: string
-        session:
-          type: string
-        agentNr:
-          type: string
-        objectCode:
           type: integer
           format: int64
-        purchasePrice:
-          type: number
-          format: double
-        purchaseDate:
-          type: string
-          format: date
+      example:
+        minClose: 0
+        maxOpen: 30000
+        insurancePremium: 500
